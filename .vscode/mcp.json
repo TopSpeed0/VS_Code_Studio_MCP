@@ -1,0 +1,20 @@
+{
+  "servers": {
+    "telegram-tg": {
+      "command": "node",
+      "args": [
+        "--use-system-ca",
+        "${workspaceFolder}/mcp/telegram-tg.js"
+      ],
+      "env": {
+        "TELEGRAM_WORKER_NAME": "VS_Code"
+      }
+    },
+    "vscode-queue": {
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/mcp/vscode-queue.js"
+      ]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# Secrets — never commit
+.telegram-config
+.env
+.env.local
+
+# Runtime files
+.vscode-queue.json
+.vscode-worker.heartbeat
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+node_modules/
