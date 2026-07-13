@@ -18,27 +18,33 @@ Your chat_id is the `chat_id` field in `.telegram-config`.
 - `queue_error(message)` — marks task failed. Hermes reports the error.
 
 **Telegram (direct, your own bot):**
-- `tg_ask(question?, timeoutSeconds, parse_mode)` — sends a message via VS Code bot and waits for reply. Empty question = silent wait.
-- `tg_send(text, parse_mode)` — fire-and-forget via VS Code bot. Use for progress + final answer.
+- `tg_ask(question?, timeoutSeconds, parse_mode, watch_queue?, choices?)` — sends a message via VS Code bot and waits for reply. Empty question = silent wait. `watch_queue:true` (silent only) ALSO watches the Hermes queue file in the same call.
+- `tg_send(text, parse_mode, file_path?, chat_id?, thread_id?)` — fire-and-forget via VS Code bot. Use for progress + final answer. `file_path` attaches an image/log/report.
+- `tg_edit(message_id, text)` — edit a sent message in place (live progress, no chat spam).
+- `tg_react(message_id?, emoji?)` — emoji reaction on a message (👀 ack; defaults to last inbound message).
 - `tg_typing(seconds)` — shows typing indicator via VS Code bot.
 
 ## Loop (run forever, no permission needed between iterations)
 
-**Every iteration — poll BOTH sources with a short timeout (60s):**
+**Use ONE unified long-lived poll — NOT a parallel batch.**
 
-1. Call `queue_poll(timeoutSeconds: 60)` AND `tg_ask(question: "", timeoutSeconds: 60)` — whichever returns a real task first wins.
-2. If both timeout → loop back to step 1.
-3. Determine source:
-   - **Queue task** → reply with `queue_done` / `queue_error` (Hermes relays to user)
-   - **Telegram task** → reply with `tg_send` (your own bot sends to user)
-4. Before any work → call `tg_typing` (via your bot, even for queue tasks — user sees you're alive).
-5. Do the work: file edits, terminal, search, web, any VS Code tools.
-6. For tasks > 60s → send a `tg_send` heartbeat every 2 minutes ("⏳ Still working…").
-7. When done:
+> Why: `queue_poll` and `tg_ask` in a parallel batch only return once BOTH finish, so the slower poll gates the faster one — a Telegram message can sit up to the full timeout before you see it. And a short timeout (25s) forces a new agent turn every 25s, so the loop dies the instant the agent stops. The fix is a single blocking call that races both sources internally.
+
+**Every iteration:**
+
+1. Call `tg_ask(question: "", timeoutSeconds: 3600, watch_queue: true)` — ONE tool call, alone (not batched). It blocks up to 1 hour on a single turn and returns the instant EITHER a Hermes queue task appears OR the user sends a Telegram message. Telegram is caught instantly; the queue is checked every ~8s internally.
+2. Inspect the returned text:
+   - Starts with a JSON object containing `"__queue_task__": true` → it's a **queue task**. Parse `id`, `task`, `context`. Do the work, then `queue_done("summary")` / `queue_error("msg")` (Hermes relays to user).
+   - Plain text → it's a **direct Telegram message**. Do the work, then `tg_send("summary")` (your own bot replies).
+   - `ERROR: ... Timed out.` (no event in the hour) → loop back to step 1 immediately.
+3. Before any work → typing is auto-started when a message/task is caught; for long work call `tg_typing`/`tg_send` to keep the user informed.
+4. Do the work: file edits, terminal, search, web, any VS Code tools.
+5. For tasks > 60s → send a `tg_send` heartbeat every 2 minutes ("⏳ Still working…"), or use `tg_edit` to update one status message.
+6. When done:
    - Queue task → `queue_done("summary under 3000 chars")`
    - Direct task → `tg_send("summary")`
-8. Write heartbeat: update `.vscode-worker.heartbeat` with `{ "ts": <epoch_ms> }` after each completed task.
-9. Loop back to step 1.
+7. Write heartbeat: update `.vscode-worker.heartbeat` with `{ "ts": <epoch_ms> }` after each completed task.
+8. Loop back to step 1.
 
 **First iteration only:** send `tg_send("🟢 VS Code worker ready.")` via your bot so the user knows you're up.
 
