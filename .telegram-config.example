@@ -1,6 +1,5 @@
 {
-  "_comment": "Copy to .telegram-config and fill in your tokens.",
-  "bot_token": "PUT-YOUR-MAIN-BOT-TOKEN-HERE",
+  "_comment": "Copy to .telegram-config and fill in. chat_id = your Telegram user ID (numeric).",
   "chat_id": "PUT-YOUR-NUMERIC-CHAT-ID-HERE",
   "tokens": [
     { "name": "VS_Code", "key": "PUT-YOUR-VSCODE-BOT-TOKEN-HERE" }
