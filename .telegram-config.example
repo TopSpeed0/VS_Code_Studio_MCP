@@ -1,42 +1,8 @@
 {
-  "_comment": "Copy to .telegram-config and fill in. bot_token and chat_id are required.",
-  "bot_token": "PUT-YOUR-BOT-TOKEN-HERE",
+  "_comment": "Copy to .telegram-config and fill in your tokens.",
+  "bot_token": "PUT-YOUR-MAIN-BOT-TOKEN-HERE",
   "chat_id": "PUT-YOUR-NUMERIC-CHAT-ID-HERE",
-
-  "_comment_skills_dirs": "Optional. Extra skill directories to include in the skills index (in addition to ~/.claude/skills/). Supports ~ for home dir. Useful for corporate/private skill repos that should NOT be committed to this public repo.",
-  "skills_dirs": [
-    "~/.claude/skills"
-  ],
-
-  "_comment_pre_scripts": "Optional. Commands to run BEFORE Hermes starts. Start-Hermes.ps1 expands $WORKSPACE (= repo root, i.e. parent of scripts/) and $env:LOCALAPPDATA at runtime. Use for: skills sync, credential refresh, token renewal.",
-  "pre_scripts": [
-    "\"$env:LOCALAPPDATA\\hermes\\hermes-agent\\venv\\Scripts\\python.exe\" \"$env:LOCALAPPDATA\\hermes\\scripts\\sync-skills.py\"",
-    "node --use-system-ca \"$WORKSPACE\\scripts\\sync-skills.js\""
-  ],
-
-  "_comment_post_scripts": "Optional. Commands to run AFTER Hermes starts. Same variable expansion applies. Use for: KVM/oVirt token renewal, external service auth.",
-  "post_scripts": [
-    "\"C:\\Program Files\\PowerShell\\7\\pwsh.exe\" -NoLogo -NoProfile -File \"<path-to-post-script.ps1>\""
-  ],
-
-  "_comment_tokens": "Optional. Named API tokens/keys used by Hermes or skills at runtime. Each entry has a name and key.",
   "tokens": [
     { "name": "VS_Code", "key": "PUT-YOUR-VSCODE-BOT-TOKEN-HERE" }
-  ],
-
-  "_comment_agents": "Optional. Configure worker daemons for Hermes Overmind task delegation.",
-  "agents": {
-    "copilot": {
-      "queue": "C:\\path\\to\\Copilot-CLI-Telegram-MCP\\.copilot-queue.json",
-      "description": "Copilot CLI Daemon (TopSpeed0/Copilot-CLI-Telegram-MCP)"
-    },
-    "claude": {
-      "queue": "C:\\path\\to\\ClaudeCodeTelgMCP\\.claude-queue.json",
-      "description": "Claude Code Daemon (TopSpeed0/ClaudeCodeTelgMCP)"
-    },
-    "vscode": {
-      "queue": "C:\\path\\to\\AI-MCP-telegram-agents\\.vscode-queue.json",
-      "description": "VS Code worker (legacy — only when VS Code is explicitly running)"
-    }
-  }
+  ]
 }
