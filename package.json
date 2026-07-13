@@ -1,0 +1,26 @@
+{
+  "name": "vs-code-studio-mcp",
+  "version": "1.2.0",
+  "description": "VS Code Studio MCP — Telegram MCP server + vscode-worker agent. Dual-input loop: Hermes queue + direct Telegram bot.",
+  "bin": {
+    "telegram-tg": "mcp/telegram-tg.js"
+  },
+  "scripts": {
+    "setup": "node --use-system-ca setup.js",
+    "setup:legacy": "node setup.js",
+    "start": "node --use-system-ca mcp/telegram-tg.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "telegram",
+    "vscode",
+    "copilot",
+    "agent",
+    "autopilot"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.10"
+  }
+}
