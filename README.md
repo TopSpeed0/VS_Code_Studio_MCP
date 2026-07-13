@@ -15,7 +15,7 @@ VS Code MCP servers + worker agent for the Hermes Overmind hybrid architecture.
 
 ```
 User (Telegram) ──► Bot A (Hermes)  ──► .vscode-queue.json ──► vscode-worker
-                                                                      │
+                                                                     │
 User (Telegram) ──► Bot B (VS_Code) ─────────────────────────────────┘
                                          vscode-worker manages both inputs
 ```
@@ -33,13 +33,12 @@ User (Telegram) ──► Bot B (VS_Code) ────────────�
 
 ## Config
 
-`.telegram-config` (gitignored — create locally):
+`.telegram-config` (gitignored — create locally, see `.telegram-config.example`):
 ```json
 {
-  "bot_token": "HERMES_BOT_TOKEN",
-  "chat_id": "YOUR_CHAT_ID",
+  "chat_id": "YOUR_NUMERIC_CHAT_ID",
   "tokens": [
-    { "name": "VS_Code", "key": "VSCODE_BOT_TOKEN" }
+    { "name": "VS_Code", "key": "YOUR_VSCODE_BOT_TOKEN" }
   ]
 }
 ```
