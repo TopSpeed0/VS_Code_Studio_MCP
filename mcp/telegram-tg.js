@@ -1,13 +1,15 @@
 #!/usr/bin/env node
 // telegram-tg.js — Zero-dependency Telegram MCP server (stdio).
-// Exposes two tools to the agent:
-//   tg_send  — one-way notification ("ACTION NEEDED in VS Code", etc.)
-//   tg_ask   — send a question and block until the user replies on Telegram.
+// Exposes three tools to the agent:
+//   tg_send   — one-way notification
+//   tg_ask    — send a question and block until the user replies on Telegram
+//   tg_typing — show typing indicator
 //
 // Config resolution (first match wins):
 //   1. Env vars TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID
-//   2. JSON file at <workspace>/.telegram-config:
-//        { "bot_token": "...", "chat_id": "..." }
+//   2. JSON file at <workspace>/.telegram-config with TELEGRAM_WORKER_NAME env var:
+//        { "chat_id": "...", "tokens": [{ "name": "VS_Code", "key": "..." }] }
+//        Set TELEGRAM_WORKER_NAME=VS_Code → uses that token entry
 //
 // Protocol: JSON-RPC 2.0 over stdio (MCP 2024-11-05).
 // All non-protocol output (errors, debug) goes to stderr — never stdout.
@@ -42,12 +44,14 @@ function loadConfig() {
     if (entry && entry.key) {
       return { bot_token: entry.key, chat_id: cfg.chat_id };
     }
-    process.stderr.write(`[telegram-tg] WARNING: TELEGRAM_WORKER_NAME="${workerName}" not found in tokens[]. Falling back to main bot_token.\n`);
+    process.stderr.write(`[telegram-tg] WARNING: TELEGRAM_WORKER_NAME="${workerName}" not found in tokens[]. Cannot start.\n`);
+    throw new Error(`Token "${workerName}" not found in .telegram-config tokens[].`);
   }
-  if (!cfg.bot_token || !cfg.chat_id) {
-    throw new Error(`${cfgPath} must contain "bot_token" and "chat_id".`);
-  }
-  return cfg;
+  // No TELEGRAM_WORKER_NAME set — require explicit env vars
+  throw new Error(
+    `Set TELEGRAM_WORKER_NAME env var to pick a token from .telegram-config tokens[], ` +
+    `or set TELEGRAM_BOT_TOKEN + TELEGRAM_CHAT_ID env vars directly.`
+  );
 }
 
 let config;
